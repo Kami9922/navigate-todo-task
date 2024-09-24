@@ -1,0 +1,12 @@
+.todo-input {
+  margin-bottom: 25px;
+}
+
+.inputs-header {
+  margin: 0 auto;
+  position: absolute;
+  top: 130px;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+}
