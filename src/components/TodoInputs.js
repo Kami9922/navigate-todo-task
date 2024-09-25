@@ -7,8 +7,6 @@ const TodoInput = ({
   isCreating,
   isSearching,
   setInputSearchValue,
-  cutString,
-  inputCutValue,
 }) => {
   return (
     <div className={styles['inputs-header']}>

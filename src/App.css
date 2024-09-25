@@ -54,3 +54,12 @@ input {
   padding: 5px;
   font-weight: bold;
 }
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+a:hover {
+  color: rgb(228, 228, 228);
+}

@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
 import styles from '../css/todo.module.css'
 import TodoInputs from './TodoInputs'
+import { Link } from 'react-router-dom'
+import RoutesTodo from './RoutesTodo'
 
 const Todo = () => {
   //Отображение
   const [todos, setTodos] = useState([])
   //Создание
   const [inputCreateValue, setInputCreateValue] = useState('')
-  const [inputCutValue, setInputCutValue] = useState('')
-  const [cutTodoId, setCutTodoId] = useState('')
   //Изменение
   const [inputUpdateValue, setInputUpdateValue] = useState('')
   const [isUpdating, setIsUpdating] = useState(false)
@@ -132,7 +132,6 @@ const Todo = () => {
         Поиск дела
       </button>
       <TodoInputs
-        inputCutValue={inputCutValue}
         createTodo={createTodo}
         inputSearchValue={inputSearchValue}
         setInputSearchValue={setInputSearchValue}
@@ -180,11 +179,12 @@ const Todo = () => {
                 </button>
               </form>
             ) : (
-              <span className={styles['todo-title']}>
+              // Начать здесь. Написать функцию открывающую большое окно с задачей с подробной информацией
+              <Link className={styles['todo-title']} onClick={() => 1}>
                 {title.length > 25 ? title.substring(0, 25) + '...' : title}
-              </span>
+              </Link>
             )}
-            {/* <div>
+            <div>
               <button
                 className={
                   editingTodoId === id ? styles.hidden : 'custom-button'
@@ -201,10 +201,11 @@ const Todo = () => {
               >
                 Выполнено
               </button>
-            </div> */}
+            </div>
           </div>
         ))
       )}
+      <RoutesTodo />
     </div>
   )
 }
