@@ -3,8 +3,7 @@
   flex-direction: column;
 }
 .todo {
-  min-width: 250px;
-  max-width: 550px;
+  width: 250px;
   gap: 15px;
   margin-bottom: 20px;
   border: solid #e7880b;
@@ -12,13 +11,18 @@
   padding: 10px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
   flex-wrap: wrap;
   font-weight: bold;
+  display: flex;
+  flex-direction: column;
 }
 
 .todo-title {
   font-size: 14px;
+}
+.todo-title-active {
+  font-size: 14px;
+  word-break: break-all;
 }
 
 .loader {

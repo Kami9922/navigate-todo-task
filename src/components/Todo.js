@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import styles from '../css/todo.module.css'
 import TodoInputs from './TodoInputs'
-import { Link } from 'react-router-dom'
-import RoutesTodo from './RoutesTodo'
+import { Routes, Route, Link, useNavigate, Outlet } from 'react-router-dom'
+import TodoItem from './TodoItem'
+import NotFound from './NotFound'
 
 const Todo = () => {
   //Отображение
@@ -25,6 +26,11 @@ const Todo = () => {
   const [filteredTodos, setFilteredTodos] = useState([])
   //Сортировка
   const [isSortedAlphabetically, setIsSortedAlphabetically] = useState(false)
+  //Открытие подробной информации
+  const [todoInfoId, setTodoInfoId] = useState('')
+  const [isRenderingTodoInfo, setIsRenderingTodoInfo] = useState(false)
+  const [currentId, setCurrentId] = useState('')
+  const [currentTitle, setCurrentTitle] = useState('')
 
   const refreshTodos = () => setRefreshTodosFlag(!refreshTodosFlag)
 
@@ -32,9 +38,30 @@ const Todo = () => {
     setIsSortedAlphabetically(!isSortedAlphabetically)
   }
 
+  const defineIdandTitle = (id, title) => {
+    setCurrentId(id)
+    setCurrentTitle(title)
+  }
+
   const startEditingTodo = (id, title) => {
     setEditingTodoId(id)
     setInputUpdateValue(title)
+  }
+  const renderTodoInfo = (id) => {
+    setTodoInfoId(id)
+    setIsRenderingTodoInfo(true)
+  }
+
+  const transformToStandard = (item) => {
+    const result = item.split('').map((el, index) => {
+      if (index === 0) {
+        return el.toUpperCase()
+      } else {
+        return el.toLowerCase()
+      }
+    })
+
+    return result.join('')
   }
 
   useEffect(() => {
@@ -79,7 +106,7 @@ const Todo = () => {
       body: JSON.stringify({
         userId: 1,
         id: new Date().valueOf(),
-        title: inputCreateValue,
+        title: transformToStandard(inputCreateValue),
         completed: false,
       }),
     })
@@ -98,7 +125,7 @@ const Todo = () => {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json;charset=utf-8' },
       body: JSON.stringify({
-        title: inputUpdateValue,
+        title: transformToStandard(inputUpdateValue),
       }),
     })
       .then((rawResponse) => rawResponse.json())
@@ -151,61 +178,84 @@ const Todo = () => {
           ? 'Отсортировать по алфавиту'
           : 'Отсортировать по алфавиту'}
       </button>
-      {isLoading ? (
-        <div className={styles.loader}></div>
-      ) : (
-        filteredTodos.map(({ id, title }) => (
-          <div className={styles.todo} key={id}>
-            {editingTodoId === id ? (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault()
-                  updateTodo(id)
-                }}
-              >
-                <input
-                  placeholder='Поменяйте дело...'
-                  value={inputUpdateValue}
-                  onChange={({ target }) => {
-                    setInputUpdateValue(target.value)
-                  }}
-                ></input>
-                <button
-                  className='custom-button'
-                  disabled={isUpdating}
-                  type='submit'
-                >
-                  Применить
-                </button>
-              </form>
+      <Routes>
+        <Route
+          path='/'
+          element={
+            isLoading ? (
+              <div className={styles.loader}></div>
             ) : (
-              // Начать здесь. Написать функцию открывающую большое окно с задачей с подробной информацией
-              <Link className={styles['todo-title']} onClick={() => 1}>
-                {title.length > 25 ? title.substring(0, 25) + '...' : title}
-              </Link>
-            )}
-            <div>
-              <button
-                className={
-                  editingTodoId === id ? styles.hidden : 'custom-button'
-                }
-                onClick={() => startEditingTodo(id, title)}
-              >
-                Изменить
-              </button>
-
-              <button
-                className='custom-button'
-                disabled={isDeleting}
-                onClick={() => deleteTodo(id)}
-              >
-                Выполнено
-              </button>
-            </div>
-          </div>
-        ))
-      )}
-      <RoutesTodo />
+              filteredTodos.map(({ id, title }) => {
+                return (
+                  <div className={styles.todo} key={id}>
+                    {editingTodoId === id ? (
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault()
+                          updateTodo(id)
+                        }}
+                      >
+                        <input
+                          placeholder='Поменяйте дело...'
+                          value={inputUpdateValue}
+                          onChange={({ target }) => {
+                            setInputUpdateValue(target.value)
+                          }}
+                        ></input>
+                        <button
+                          className='custom-button'
+                          disabled={isUpdating}
+                          type='submit'
+                        >
+                          Применить
+                        </button>
+                      </form>
+                    ) : (
+                      <>
+                        <Link
+                          to={`/task/${id}`}
+                          className={
+                            isRenderingTodoInfo && todoInfoId === id
+                              ? styles['todo-title-active']
+                              : styles['todo-title']
+                          }
+                          onClick={() => {
+                            defineIdandTitle(id, title)
+                            renderTodoInfo(id)
+                          }}
+                        >
+                          {todoInfoId === id && isRenderingTodoInfo
+                            ? title
+                            : title.length > 19
+                            ? title.substring(0, 19) + '...'
+                            : title}
+                        </Link>
+                        <Outlet />
+                      </>
+                    )}
+                  </div>
+                )
+              })
+            )
+          }
+        >
+          <Route
+            path='/task/:id'
+            element={
+              <TodoItem
+                setIsRenderingTodoInfo={setIsRenderingTodoInfo}
+                isRenderingTodoInfo={isRenderingTodoInfo}
+                editingTodoId={editingTodoId}
+                startEditingTodo={startEditingTodo}
+                isDeleting={isDeleting}
+                deleteTodo={deleteTodo}
+                title={currentTitle}
+                id={currentId}
+              />
+            }
+          />
+        </Route>
+      </Routes>
     </div>
   )
 }
