@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import styles from '../css/todo.module.css'
 import TodoInputs from './TodoInputs'
-import { Routes, Route, Link, useNavigate, Outlet } from 'react-router-dom'
+import { Routes, Route, Link, Outlet } from 'react-router-dom'
 import TodoItem from './TodoItem'
 import NotFound from './NotFound'
 
@@ -27,10 +27,9 @@ const Todo = () => {
   //Сортировка
   const [isSortedAlphabetically, setIsSortedAlphabetically] = useState(false)
   //Открытие подробной информации
-  const [todoInfoId, setTodoInfoId] = useState('')
+  const [renderTodoId, setRenderTodoId] = useState('')
   const [isRenderingTodoInfo, setIsRenderingTodoInfo] = useState(false)
-  const [currentId, setCurrentId] = useState('')
-  const [currentTitle, setCurrentTitle] = useState('')
+  const [renderTodoTitle, setRenderTodoTitle] = useState('')
 
   const refreshTodos = () => setRefreshTodosFlag(!refreshTodosFlag)
 
@@ -38,21 +37,18 @@ const Todo = () => {
     setIsSortedAlphabetically(!isSortedAlphabetically)
   }
 
-  const defineIdandTitle = (id, title) => {
-    setCurrentId(id)
-    setCurrentTitle(title)
-  }
-
   const startEditingTodo = (id, title) => {
     setEditingTodoId(id)
     setInputUpdateValue(title)
   }
-  const renderTodoInfo = (id) => {
-    setTodoInfoId(id)
+  const renderTodoInfo = (id, title) => {
+    setRenderTodoId(id)
+    setRenderTodoTitle(title)
     setIsRenderingTodoInfo(true)
   }
 
   const transformToStandard = (item) => {
+    if (!item) return renderTodoTitle
     const result = item.split('').map((el, index) => {
       if (index === 0) {
         return el.toUpperCase()
@@ -131,7 +127,7 @@ const Todo = () => {
       .then((rawResponse) => rawResponse.json())
       .then(() => {
         setEditingTodoId(null)
-
+        setInputUpdateValue('')
         refreshTodos()
       })
       .finally(() => setIsUpdating(false))
@@ -197,7 +193,7 @@ const Todo = () => {
                       >
                         <input
                           placeholder='Поменяйте дело...'
-                          value={inputUpdateValue}
+                          defaultValue={inputUpdateValue || title}
                           onChange={({ target }) => {
                             setInputUpdateValue(target.value)
                           }}
@@ -215,22 +211,21 @@ const Todo = () => {
                         <Link
                           to={`/task/${id}`}
                           className={
-                            isRenderingTodoInfo && todoInfoId === id
+                            isRenderingTodoInfo && renderTodoId === id
                               ? styles['todo-title-active']
                               : styles['todo-title']
                           }
                           onClick={() => {
-                            defineIdandTitle(id, title)
-                            renderTodoInfo(id)
+                            renderTodoInfo(id, title)
                           }}
                         >
-                          {todoInfoId === id && isRenderingTodoInfo
+                          {renderTodoId === id && isRenderingTodoInfo
                             ? title
                             : title.length > 19
                             ? title.substring(0, 19) + '...'
                             : title}
                         </Link>
-                        <Outlet />
+                        {id === renderTodoId ? <Outlet /> : ''}
                       </>
                     )}
                   </div>
@@ -240,21 +235,21 @@ const Todo = () => {
           }
         >
           <Route
-            path='/task/:id'
+            path='task/:id'
             element={
               <TodoItem
                 setIsRenderingTodoInfo={setIsRenderingTodoInfo}
-                isRenderingTodoInfo={isRenderingTodoInfo}
                 editingTodoId={editingTodoId}
                 startEditingTodo={startEditingTodo}
                 isDeleting={isDeleting}
                 deleteTodo={deleteTodo}
-                title={currentTitle}
-                id={currentId}
+                title={renderTodoTitle}
+                id={renderTodoId}
               />
             }
           />
         </Route>
+        <Route path='*' element={<NotFound />} />
       </Routes>
     </div>
   )

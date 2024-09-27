@@ -1,0 +1,7 @@
+.todo-item {
+  display: flex;
+  flex-direction: column;
+}
+.todo-item__title {
+  font-size: 18px;
+}

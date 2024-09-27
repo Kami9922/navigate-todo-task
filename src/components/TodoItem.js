@@ -1,6 +1,6 @@
 import React from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
-import styles from '../css/todo.module.css'
+import { Link } from 'react-router-dom'
+import styles from '../css/todoItem.module.css'
 
 const TodoItem = ({
   editingTodoId,
@@ -11,40 +11,35 @@ const TodoItem = ({
   title,
   id,
 }) => {
-  const navigate = useNavigate()
-
   return (
-    <div>
-      <button
-        className={editingTodoId === id ? styles.hidden : 'custom-button'}
-        onClick={() => {
-          startEditingTodo(id, title)
-          console.log(typeof id)
-        }}
-      >
-        Изменить
-      </button>
-      <button
-        className='custom-button'
-        disabled={isDeleting}
-        onClick={() => {
-          deleteTodo(id)
-          console.log('!')
-        }}
-      >
-        Выполнено
-      </button>
-      <button className='custom-button'>
-        <Link
-          to='/'
+    <div className={styles['todo-item']}>
+      <div>
+        <button
+          className={editingTodoId === id ? styles.hidden : 'custom-button'}
           onClick={() => {
-            setIsRenderingTodoInfo(false)
-            navigate(-1, { replace: true })
+            startEditingTodo(id, title)
           }}
         >
-          Назад
-        </Link>
-      </button>
+          Изменить
+        </button>
+        <button
+          className='custom-button'
+          disabled={isDeleting}
+          onClick={() => {
+            deleteTodo(id)
+          }}
+        >
+          Выполнено
+        </button>
+        <button
+          className='custom-button'
+          onClick={() => {
+            setIsRenderingTodoInfo(false)
+          }}
+        >
+          <Link to={'/'}>Назад</Link>
+        </button>
+      </div>
     </div>
   )
 }
